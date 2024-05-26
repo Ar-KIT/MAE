@@ -1,20 +1,31 @@
+using System;
+using System.Windows.Forms;
+
 namespace Tic_Tac_Toe
 {
     public partial class Form1 : Form
     {
         private TicTacToe game;
+        private Button[,] buttons;
 
         public Form1()
         {
             InitializeComponent();
             game = new TicTacToe(this);
+            InitializeButtons();
+        }
+
+        private void InitializeButtons()
+        {
+            buttons = new Button[3, 3] { { button1, button2, button3 }, { button4, button5, button6 }, { button7, button8, button9 } };
         }
 
         private void button_Click(object sender, EventArgs e)
         {
             Button button = (Button)sender;
-            int index = int.Parse(button.Tag.ToString());
-            game.MakeMove(index, button);
+            int rowIndex = int.Parse(button.Tag.ToString()) / 3;
+            int colIndex = int.Parse(button.Tag.ToString()) % 3;
+            game.MakeMove(rowIndex, colIndex, button);
         }
 
         public void UpdateScore(string winner)
@@ -32,24 +43,19 @@ namespace Tic_Tac_Toe
 
         public void ResetBoard()
         {
-            foreach (Control control in Controls)
+            foreach (Button button in buttons)
             {
-                if (control is Button && control.Tag != null)
-                {
-                    control.Text = "";
-                    control.Enabled = true;
-                }
+                button.Text = "";
+                button.Enabled = true;
             }
-
             lbl3.Text = "";
         }
+
         public void DisableAllButtons()
         {
-            foreach (Control control in Controls)
+            foreach (Button button in buttons)
             {
-                if (control.Enabled && control.Tag != null){
-                    control.Enabled = false;
-                }
+                button.Enabled = false;
             }
         }
 
@@ -62,14 +68,15 @@ namespace Tic_Tac_Toe
         {
             Application.Exit();
         }
+
         public abstract class Game
         {
-            protected string[] Board;
+            protected string[,] Board;
             protected bool isPlayerX;
 
             public Game()
             {
-                Board = new string[9];
+                Board = new string[3, 3];
                 isPlayerX = true;
             }
 
@@ -91,22 +98,25 @@ namespace Tic_Tac_Toe
             {
                 string winner = null;
 
-                if (Board[0] == Board[1] && Board[1] == Board[2] && Board[0] != null)
-                    winner = Board[0];
-                else if (Board[0] == Board[3] && Board[3] == Board[6] && Board[0] != null)
-                    winner = Board[0];
-                else if (Board[0] == Board[4] && Board[4] == Board[8] && Board[0] != null)
-                    winner = Board[0];
-                else if (Board[3] == Board[4] && Board[4] == Board[5] && Board[3] != null)
-                    winner = Board[3];
-                else if (Board[6] == Board[7] && Board[7] == Board[8] && Board[6] != null)
-                    winner = Board[6];
-                else if (Board[1] == Board[4] && Board[4] == Board[7] && Board[1] != null)
-                    winner = Board[1];
-                else if (Board[2] == Board[5] && Board[5] == Board[8] && Board[2] != null)
-                    winner = Board[2];
-                else if (Board[2] == Board[4] && Board[4] == Board[6] && Board[2] != null)
-                    winner = Board[2];
+                for (int i = 0; i < 3; i++)
+                {
+                    if (Board[i, 0] == Board[i, 1] && Board[i, 1] == Board[i, 2] && Board[i, 0] != null)
+                    {
+                        winner = Board[i, 0];
+                        break;
+                    }
+
+                    if (Board[0, i] == Board[1, i] && Board[1, i] == Board[2, i] && Board[0, i] != null)
+                    {
+                        winner = Board[0, i];
+                        break;
+                    }
+                }
+
+                if (Board[0, 0] == Board[1, 1] && Board[1, 1] == Board[2, 2] && Board[0, 0] != null)
+                    winner = Board[0, 0];
+                else if (Board[0, 2] == Board[1, 1] && Board[1, 1] == Board[2, 0] && Board[0, 2] != null)
+                    winner = Board[0, 2];
 
                 if (winner != null)
                 {
@@ -120,24 +130,29 @@ namespace Tic_Tac_Toe
 
             public override void Reset()
             {
-                for (int i = 0; i < Board.Length; i++)
-                    Board[i] = null;
+                for (int i = 0; i < 3; i++)
+                {
+                    for (int j = 0; j < 3; j++)
+                    {
+                        Board[i, j] = null;
+                    }
+                }
 
                 isPlayerX = true;
                 form.ResetBoard();
             }
 
-            public void MakeMove(int index, Button button)
+            public void MakeMove(int row, int col, Button button)
             {
                 if (isPlayerX)
                 {
                     button.Text = "X";
-                    Board[index] = "X";
+                    Board[row, col] = "X";
                 }
                 else
                 {
                     button.Text = "O";
-                    Board[index] = "O";
+                    Board[row, col] = "O";
                 }
 
                 button.Enabled = false;
